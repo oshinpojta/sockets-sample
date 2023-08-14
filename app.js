@@ -96,7 +96,15 @@ io.on("connection", (socket) => {
 
 
     // check if admin of the room, allow kick option
-    socket.on('kick', function(clientId) {
+    socket.on('kick', function(params, callback) {
+
+        const { selfId, clientId } = params;
+
+        // check if current user is Admin or not of this room
+        // if( selfId is not of Admin of this room ){
+        //     return;
+        // }
+
         if (typeof io.sockets.sockets[clientId] != 'undefined') {
             socket.emit('message', {text: socket.id + ' kicked: ' + clientId});
             io.sockets.sockets[clientId].disconnect();
