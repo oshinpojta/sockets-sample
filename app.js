@@ -7,6 +7,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const { generateMessage, generateLoactionMessage } = require("./utils/message")
 
 const app = express();
 const server = http.createServer(app);
@@ -45,8 +46,8 @@ io.on("connection", (socket) => {
         text : "Hello All, One User has joined the Chat app!"
     })
     
-    socket.on("message", (message) => {
-        // console.log("message rec : ",message);
+    socket.on("message", (message, callback) => {
+        console.log("message rec : ",message);
         // io.emit("message", {
         //     from : message.from,
         //     text : message.text,
@@ -54,9 +55,11 @@ io.on("connection", (socket) => {
         // })
         socket.broadcast.emit("message", {
             from : message.from,
-            text : message.text,
+            text : message.text + " text added to on message ",
             createdAt : new Date().getTime()
         })
+        const acknowledgeText = "Server Sent Messages to Everyone else";
+        callback({ text : acknowledgeText });
     })
 
     socket.on("disconnect", () => {
