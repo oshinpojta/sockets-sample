@@ -73,6 +73,7 @@ io.on("connection", (socket) => {
 
         // join socket room, to only broadcast to this room
         // check if user can join the room
+        // BAN-User option -----//
         let userCanJoin = true;
         if(userCanJoin){
             socket.join(params.room);
