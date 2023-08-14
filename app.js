@@ -27,7 +27,9 @@ app.get("/index", (req, res, next) => {
 
 io.on("connection", (socket) => {
     // socket.emit("connect", {message : "A new User Connected!"});
-    console.log("User Connected");
+    console.log("User Connected : ", socket.id);
+    
+    // ----- during connection map user.id to socket.id ------ //
 
     // socket.on("chat", message => {
     //     console.log("From Client : ", message);
@@ -62,8 +64,58 @@ io.on("connection", (socket) => {
         callback({ text : acknowledgeText });
     })
 
-    socket.on("disconnect", () => {
-        console.log("User Disconnected");
+    socket.on("join", (params, callback) => {
+        if(!params || !params.user || !params.room || params.room == " " || params.user == " " ){
+            // create a function where check blank strings for user and room etc...
+            callback("Param Values invalid!");
+            return;
+        }
+
+        // join socket room, to only broadcast to this room
+        // check if user can join the room
+        let userCanJoin = true;
+        if(userCanJoin){
+            socket.join(params.room);
+        }else{
+            callback("User Cannot Join This Room");
+            return;
+        }
+        
+
+        // to update users in that room, goes to everyone
+        io.to(params.room).emit("update-users", []); 
+
+        //  Message only goes to this room, to others.
+        socket.broadcast.to(params.room).emit("room-message", { msg : "New User Joined!" }); 
+
+        callback(null)
+    })
+
+    socket.on("disconnect", (data) => {
+
+
+    // check if admin of the room, allow kick option
+    socket.on('kick', function(clientId) {
+        if (typeof io.sockets.sockets[clientId] != 'undefined') {
+            socket.emit('message', {text: socket.id + ' kicked: ' + clientId});
+            io.sockets.sockets[clientId].disconnect();
+        } else {
+            socket.emit('message', {text: 'User: ' + name + ' does not exist.'});
+        }
+    });
+    // ------ check for user.id to socket.id mapping in room and delete and disconnect that user --- ///
+
+        // delete user with socket_id if disconnects 
+        // Each user has a unique socket id
+        let socketId = socket.id;
+
+        // to update users in that room, goes to everyone
+        // io.to(params.room).emit("update-users", []); 
+
+        //  Message only goes to this room, to others.
+        // socket.broadcast.to(params.room).emit("room-message", { msg : "User has left!" }); 
+
+        console.log("User Disconnected : ", socketId, data);
     })
 })
 
