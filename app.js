@@ -98,18 +98,18 @@ io.on("connection", (socket) => {
     // check if admin of the room, allow kick option
     socket.on('kick', function(params, callback) {
 
-        const { selfId, clientId } = params;
-
+        const { selfUserId, clientSocketId, clientUserId} = params;
+        const selfSocketId = socket.id;
         // check if current user is Admin or not of this room
         // if( selfId is not of Admin of this room ){
         //     return;
         // }
 
-        if (typeof io.sockets.sockets[clientId] != 'undefined') {
-            socket.emit('message', {text: socket.id + ' kicked: ' + clientId});
-            io.sockets.sockets[clientId].disconnect();
+        if (typeof io.sockets.sockets[clientSocketId] != 'undefined') {
+            socket.emit('message', {text: selfUserId + ' kicked: ' + clientUserId});
+            io.sockets.sockets[clientSocketId].disconnect();
         } else {
-            socket.emit('message', {text: 'User: ' + name + ' does not exist.'});
+            socket.emit('message', {text: 'User: ' + clientSocketId + ' does not exist.'});
         }
     });
     // ------ check for user.id to socket.id mapping in room and delete and disconnect that user --- ///
